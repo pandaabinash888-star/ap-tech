@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { NotificationService } from '@/lib/notifications';
 
 export default function BookingConfirmation() {
   const router = useRouter();
@@ -20,6 +21,9 @@ export default function BookingConfirmation() {
     const foundBooking = bookings.find((b: any) => b.id === bookingId);
     if (foundBooking) {
       setBooking(foundBooking);
+      
+      // Send notifications to admin
+      NotificationService.notifyNewBooking(foundBooking);
     } else {
       router.push('/home');
     }

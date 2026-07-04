@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { NotificationService } from '@/lib/notifications';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function AdminDashboard() {
     totalUsers: 0,
     monthlyRevenue: 0,
   });
+  const [recentNotifications, setRecentNotifications] = useState<any[]>([]);
 
   useEffect(() => {
     const adminData = localStorage.getItem('adminUser');
@@ -44,6 +46,10 @@ export default function AdminDashboard() {
       totalUsers: users.length,
       monthlyRevenue: revenue,
     });
+
+    // Load recent notifications
+    const notifications = NotificationService.getAdminNotifications();
+    setRecentNotifications(notifications.slice(-5).reverse());
   }, [router]);
 
   const handleLogout = () => {
@@ -104,6 +110,32 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Recent Notifications Alert */}
+        {recentNotifications.length > 0 && (
+          <div className="mb-8 bg-blue-50 border-l-4 border-blue-500 rounded-lg p-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-blue-900 mb-3">Recent Booking Alerts</h3>
+                <div className="space-y-2">
+                  {recentNotifications.map((notif) => (
+                    <div key={notif.id} className="text-sm text-blue-800">
+                      <p className="font-medium">{notif.title}</p>
+                      <p className="text-blue-700">{notif.message}</p>
+                      <p className="text-xs text-blue-600 mt-1">{new Date(notif.timestamp).toLocaleString()}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Link
+                href="/admin/notifications"
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm whitespace-nowrap"
+              >
+                View All
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {/* Total Bookings */}
