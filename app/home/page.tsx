@@ -66,8 +66,8 @@ export default function HomeScreen() {
     return null;
   }
 
-  const whatsappNumber = '8817660170';
-  const whatsappLink = `https://wa.me/${whatsappNumber}?text=Hi%20AP%20TECH%2C%20I%20want%20to%20book%20a%20service`;
+  const whatsappNumber = '+918817660170';
+  const whatsappLink = `https://wa.me/${+918817660170}?text=Hi%20AP%20TECH%2C%20I%20want%20to%20book%20a%20service`;
 
   return (
     <div className="min-h-screen bg-gray-50">
