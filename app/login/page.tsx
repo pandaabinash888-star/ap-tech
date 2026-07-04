@@ -48,7 +48,7 @@ export default function LoginScreen() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4 font-bold">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+      <div className="rounded-2xl shadow-xl p-8 w-full max-w-md" style={{ backgroundColor: '#2a2929' }}>
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-block bg-blue-600 text-white p-3 rounded-full mb-4">
@@ -67,11 +67,11 @@ export default function LoginScreen() {
             </svg>
           </div>
           <h1 className="text-3xl font-bold text-blue-600">AP TECH</h1>
-          <p className="text-gray-600 text-sm mt-1">Doorstep Repair Service</p>
+          <p className="text-gray-400 text-sm mt-1">Doorstep Repair Service</p>
         </div>
 
         {/* Form Title */}
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">
+        <h2 className="text-2xl font-bold text-white mb-6">
           {isLogin ? 'Welcome Back' : 'Create Account'}
         </h2>
 
@@ -101,7 +101,7 @@ export default function LoginScreen() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-400 mb-2">
                   Phone Number
                 </label>
                 <input
@@ -118,7 +118,7 @@ export default function LoginScreen() {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-400 mb-2">
               Email
             </label>
             <input
@@ -139,7 +139,7 @@ export default function LoginScreen() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-400 mb-2">
               Password
             </label>
             <input
@@ -148,7 +148,11 @@ export default function LoginScreen() {
               value={formData.password}
               onChange={handleInputChange}
               placeholder="Enter your password"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="w-full px-4 py-2 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              style={{ 
+                backgroundColor: '#1a1a1a',
+                color: 'white'
+              }}
               required
             />
           </div>
@@ -164,7 +168,7 @@ export default function LoginScreen() {
 
         {/* Toggle Auth Mode */}
         <div className="mt-6 text-center">
-          <p className="text-gray-600 text-sm">
+          <p className="text-gray-400 text-sm">
             {isLogin ? "Don't have an account?" : 'Already have an account?'}
             <button
               onClick={() => {
@@ -172,7 +176,7 @@ export default function LoginScreen() {
                 setError('');
                 setFormData({ email: '', password: '', name: '', phone: '' });
               }}
-              className="text-blue-600 font-semibold ml-1 hover:text-blue-700"
+              className="text-blue-500 font-semibold ml-1 hover:text-blue-400"
             >
               {isLogin ? 'Sign Up' : 'Login'}
             </button>
@@ -180,21 +184,21 @@ export default function LoginScreen() {
         </div>
 
         {/* Features */}
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <p className="text-center text-gray-600 text-xs font-medium mb-3">
+        <div className="mt-8 pt-6 border-t border-gray-600">
+          <p className="text-center text-gray-400 text-xs font-medium mb-3">
             Why choose AP TECH?
           </p>
-          <ul className="space-y-2 text-xs text-gray-600">
+          <ul className="space-y-2 text-xs text-gray-400">
             <li className="flex items-center">
-              <span className="text-blue-600 font-bold mr-2">✓</span>
+              <span className="text-blue-500 font-bold mr-2">✓</span>
               Professional Technicians
             </li>
             <li className="flex items-center">
-              <span className="text-blue-600 font-bold mr-2">✓</span>
+              <span className="text-blue-500 font-bold mr-2">✓</span>
               Warranty on Repairs
             </li>
             <li className="flex items-center">
-              <span className="text-blue-600 font-bold mr-2">✓</span>
+              <span className="text-blue-500 font-bold mr-2">✓</span>
               Doorstep Service
             </li>
           </ul>
