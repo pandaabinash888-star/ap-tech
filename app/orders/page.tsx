@@ -6,6 +6,8 @@ import Link from 'next/link';
 
 export default function OrdersScreen() {
   const router = useRouter();
+  const whatsappNumber = '8817660170';
+  const whatsappLink = `https://wa.me/${whatsappNumber}?text=Hi%20AP%20TECH%2C%20I%20have%20a%20question%20about%20my%20order`;
   const [bookings, setBookings] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('all');
@@ -72,6 +74,22 @@ export default function OrdersScreen() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-8">
+        {/* WhatsApp Support Banner */}
+        <div className="mb-6 bg-gradient-to-r from-green-50 to-green-100 border border-green-300 rounded-lg p-4 flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold text-green-900">Questions about your order?</h3>
+            <p className="text-sm text-green-800">Contact us on WhatsApp: +91 {whatsappNumber}</p>
+          </div>
+          <a
+            href={whatsappLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-semibold whitespace-nowrap ml-4"
+          >
+            Message Us
+          </a>
+        </div>
+
         {/* Tabs */}
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           {['all', 'pending', 'confirmed', 'in-progress', 'completed'].map(tab => (

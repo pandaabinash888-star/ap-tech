@@ -6,6 +6,8 @@ import Link from 'next/link';
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const whatsappNumber = '8817660170';
+  const whatsappLink = `https://wa.me/${whatsappNumber}?text=Hi%20AP%20TECH%2C%20I%20need%20support`;
   const [user, setUser] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -108,6 +110,27 @@ export default function ProfileScreen() {
               <p className="text-blue-100 text-sm">Total Spent</p>
               <p className="text-2xl font-bold mt-1">₹{totalSpent}</p>
             </div>
+          </div>
+        </div>
+
+        {/* Support Contact Section */}
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-8 border-l-4 border-green-500">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Need Support?</h2>
+          <p className="text-gray-600 mb-4">Contact us directly via WhatsApp for quick assistance with your bookings and service inquiries.</p>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div>
+              <p className="text-sm text-gray-600 mb-1">WhatsApp Number:</p>
+              <p className="text-2xl font-bold text-green-600">+91 {whatsappNumber}</p>
+            </div>
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-semibold flex items-center gap-2"
+            >
+              <span>💬</span>
+              Chat on WhatsApp
+            </a>
           </div>
         </div>
 

@@ -66,6 +66,9 @@ export default function HomeScreen() {
     return null;
   }
 
+  const whatsappNumber = '8817660170';
+  const whatsappLink = `https://wa.me/${whatsappNumber}?text=Hi%20AP%20TECH%2C%20I%20want%20to%20book%20a%20service`;
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -75,9 +78,20 @@ export default function HomeScreen() {
             <h1 className="text-2xl font-bold text-blue-600">AP TECH</h1>
             <p className="text-xs text-gray-500">Doorstep Repair Service</p>
           </div>
-          <Link
-            href="/profile"
-            className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold hover:bg-blue-700 transition-colors"
+          <div className="flex items-center gap-3">
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-semibold"
+              title="Chat on WhatsApp"
+            >
+              <span>💬</span>
+              <span className="hidden sm:inline">WhatsApp</span>
+            </a>
+            <Link
+              href="/profile"
+              className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold hover:bg-blue-700 transition-colors"
           >
             {user.name?.charAt(0).toUpperCase()}
           </Link>
