@@ -92,9 +92,10 @@ export default function HomeScreen() {
             <Link
               href="/profile"
               className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold hover:bg-blue-700 transition-colors"
-          >
-            {user.name?.charAt(0).toUpperCase()}
-          </Link>
+            >
+              {user.name?.charAt(0).toUpperCase()}
+            </Link>
+          </div>
         </div>
       </header>
 
