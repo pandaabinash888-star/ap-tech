@@ -14,7 +14,7 @@ export interface Notification {
 }
 
 const WHATSAPP_NUMBER = '8817660170';
-const ADMIN_EMAIL = 'admin@aptech.com';
+const ADMIN_EMAIL = 'pandaabinash888@gmail.com';
 
 export class NotificationService {
   // Store notifications in localStorage

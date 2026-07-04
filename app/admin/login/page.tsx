@@ -16,7 +16,7 @@ export default function AdminLogin() {
     setLoading(true);
 
     // Demo credentials
-    const adminEmail = 'admin@aptech.com';
+    const adminEmail = 'pandaabinash888@gmail.com';
     const adminPassword = 'admin123';
 
     if (email === adminEmail && password === adminPassword) {
@@ -66,12 +66,12 @@ export default function AdminLogin() {
                 <label className="block text-sm font-semibold text-slate-700 mb-3">
                   Email Address
                 </label>
-                <input
+                  <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-600 focus:border-transparent bg-slate-50 transition"
-                  placeholder="admin@aptech.com"
+                  placeholder="pandaabinash888@gmail.com"
                   required
                 />
               </div>
@@ -139,7 +139,7 @@ export default function AdminLogin() {
                   <div className="flex items-center gap-3">
                     <span className="text-slate-600 text-sm">Email:</span>
                     <code className="bg-white px-3 py-1 rounded border border-slate-200 text-slate-800 text-sm font-mono">
-                      admin@aptech.com
+                      pandaabinash888@gmail.com
                     </code>
                   </div>
                   <div className="flex items-center gap-3">
