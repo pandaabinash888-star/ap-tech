@@ -128,7 +128,12 @@ export default function LoginScreen() {
               onChange={handleInputChange}
               placeholder="Enter your email"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              style={{ backgroundColor: 'rgba(111, 63, 63, 0)' }}
+              style={{ 
+                fontStyle: 'italic',
+                backgroundColor: '#204688',
+                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+                color: 'white'
+              }}
               required
             />
           </div>
