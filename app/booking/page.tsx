@@ -187,8 +187,9 @@ export default function BookingScreen() {
           </div>
           <div className="flex justify-between text-xs text-gray-600">
             <span>Service</span>
+            <span>Date & Time</span>
             <span>Details</span>
-            <span>Confirm</span>
+            <span>Payment</span>
           </div>
         </div>
 
