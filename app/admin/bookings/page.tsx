@@ -12,6 +12,10 @@ export default function BookingsManagement() {
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
   const [newStatus, setNewStatus] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [serviceFilter, setServiceFilter] = useState('all');
 
   useEffect(() => {
     const adminData = localStorage.getItem('adminUser');
@@ -26,9 +30,38 @@ export default function BookingsManagement() {
   }, [router]);
 
   const filteredBookings = bookings.filter((b) => {
-    if (filter === 'all') return true;
-    return b.status === filter;
+    // Status filter
+    if (filter !== 'all' && b.status !== filter) return false;
+    
+    // Search query filter (search in customer name and service name)
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const customerMatch = b.customerName?.toLowerCase().includes(query);
+      const serviceMatch = b.serviceName?.toLowerCase().includes(query);
+      const idMatch = b.id?.toLowerCase().includes(query);
+      if (!customerMatch && !serviceMatch && !idMatch) return false;
+    }
+    
+    // Service filter
+    if (serviceFilter !== 'all' && b.serviceName !== serviceFilter) return false;
+    
+    // Date range filter
+    if (startDate) {
+      const bookingDate = new Date(b.date);
+      const filterStartDate = new Date(startDate);
+      if (bookingDate < filterStartDate) return false;
+    }
+    if (endDate) {
+      const bookingDate = new Date(b.date);
+      const filterEndDate = new Date(endDate);
+      filterEndDate.setHours(23, 59, 59, 999); // Include the entire end date
+      if (bookingDate > filterEndDate) return false;
+    }
+    
+    return true;
   });
+
+  const uniqueServices = Array.from(new Set(bookings.map(b => b.serviceName).filter(Boolean)));
 
   const handleStatusUpdate = () => {
     if (!selectedBooking || !newStatus) return;
@@ -90,24 +123,27 @@ export default function BookingsManagement() {
       {/* Navigation */}
       <nav className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex gap-6">
-            <Link href="/admin/dashboard" className="py-3 px-2 hover:text-blue-600 text-gray-600">
+          <div className="flex gap-6 overflow-x-auto">
+            <Link href="/admin/dashboard" className="py-3 px-2 hover:text-blue-600 text-gray-600 whitespace-nowrap">
               Dashboard
             </Link>
-            <Link href="/admin/bookings" className="py-3 px-2 border-b-2 border-blue-600 text-blue-600 font-medium">
+            <Link href="/admin/bookings" className="py-3 px-2 border-b-2 border-blue-600 text-blue-600 font-medium whitespace-nowrap">
               Bookings
             </Link>
-            <Link href="/admin/technicians" className="py-3 px-2 hover:text-blue-600 text-gray-600">
+            <Link href="/admin/technicians" className="py-3 px-2 hover:text-blue-600 text-gray-600 whitespace-nowrap">
               Technicians
             </Link>
-            <Link href="/admin/services" className="py-3 px-2 hover:text-blue-600 text-gray-600">
+            <Link href="/admin/services" className="py-3 px-2 hover:text-blue-600 text-gray-600 whitespace-nowrap">
               Services
             </Link>
-            <Link href="/admin/users" className="py-3 px-2 hover:text-blue-600 text-gray-600">
+            <Link href="/admin/users" className="py-3 px-2 hover:text-blue-600 text-gray-600 whitespace-nowrap">
               Users
             </Link>
-            <Link href="/admin/analytics" className="py-3 px-2 hover:text-blue-600 text-gray-600">
+            <Link href="/admin/analytics" className="py-3 px-2 hover:text-blue-600 text-gray-600 whitespace-nowrap">
               Analytics
+            </Link>
+            <Link href="/admin/settings" className="py-3 px-2 hover:text-blue-600 text-gray-600 whitespace-nowrap">
+              Settings
             </Link>
           </div>
         </div>
@@ -117,26 +153,71 @@ export default function BookingsManagement() {
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* Filter and Stats */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">All Bookings ({filteredBookings.length})</h2>
+            <p className="text-gray-600 text-sm">Manage and track customer service bookings</p>
+          </div>
+
+          {/* Search and Advanced Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">All Bookings ({filteredBookings.length})</h2>
-              <p className="text-gray-600 text-sm">Manage and track customer service bookings</p>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+              <input
+                type="text"
+                placeholder="Search by customer, service or ID..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-sm"
+              />
             </div>
-            <div className="flex gap-2">
-              {['all', 'pending', 'confirmed', 'in-progress', 'completed', 'cancelled'].map((status) => (
-                <button
-                  key={status}
-                  onClick={() => setFilter(status)}
-                  className={`px-4 py-2 rounded transition capitalize ${
-                    filter === status
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {status}
-                </button>
-              ))}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Service</label>
+              <select
+                value={serviceFilter}
+                onChange={(e) => setServiceFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-sm"
+              >
+                <option value="all">All Services</option>
+                {uniqueServices.map((service) => (
+                  <option key={service} value={service}>{service}</option>
+                ))}
+              </select>
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-sm"
+              />
+            </div>
+          </div>
+
+          {/* Status Filter Buttons */}
+          <div className="flex flex-wrap gap-2">
+            {['all', 'pending', 'confirmed', 'in-progress', 'completed', 'cancelled'].map((status) => (
+              <button
+                key={status}
+                onClick={() => setFilter(status)}
+                className={`px-4 py-2 rounded transition capitalize text-sm ${
+                  filter === status
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {status}
+              </button>
+            ))}
           </div>
         </div>
 
