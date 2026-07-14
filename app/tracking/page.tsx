@@ -98,8 +98,32 @@ function TrackingContent() {
     }));
   };
 
-  if (!user || !booking) {
-    return null;
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Tracking Service</h2>
+          <p className="text-gray-600 mb-4">Please log in to track your service</p>
+          <Link href="/login" className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            Go to Login
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!booking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">No Active Booking</h2>
+          <p className="text-gray-600 mb-4">You don&apos;t have any active bookings to track</p>
+          <Link href="/home" className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            Go to Home
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   const service = services[booking.service];
@@ -277,7 +301,7 @@ function TrackingContent() {
                 </div>
                 <div className="pb-8">
                   <p className="font-semibold text-gray-800">Technician Assigned</p>
-                  <p className="text-xs text-gray-500 mt-1">Assigned to {mockTechnician.name}</p>
+                  <p className="text-xs text-gray-500 mt-1">Assigned to {booking?.assignedTechnician || technician.name}</p>
                 </div>
               </div>
             )}
