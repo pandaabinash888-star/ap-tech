@@ -12,6 +12,9 @@ interface Service {
   basePrice: number;
   icon: string;
   estimatedTime: number;
+  bookingsCount?: number;
+  rating?: number;
+  status?: 'active' | 'inactive';
 }
 
 export default function ServicesManagement() {

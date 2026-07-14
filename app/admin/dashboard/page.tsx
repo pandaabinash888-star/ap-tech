@@ -17,6 +17,12 @@ export default function AdminDashboard() {
     monthlyRevenue: 0,
   });
   const [recentNotifications, setRecentNotifications] = useState<any[]>([]);
+  const [trends, setTrends] = useState({
+    bookingTrend: '+12%',
+    revenueTrend: '+8%',
+    userTrend: '+5%',
+  });
+  const [activityLog, setActivityLog] = useState<any[]>([]);
 
   useEffect(() => {
     const adminData = localStorage.getItem('adminUser');
@@ -50,6 +56,10 @@ export default function AdminDashboard() {
     // Load recent notifications
     const notifications = NotificationService.getAdminNotifications();
     setRecentNotifications(notifications.slice(-5).reverse());
+
+    // Load activity log
+    const activities = JSON.parse(localStorage.getItem('activityLog') || '[]');
+    setActivityLog(activities.slice(-10).reverse());
   }, [router]);
 
   const handleLogout = () => {
@@ -72,6 +82,12 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm">{admin.email}</span>
+            <Link
+              href="/admin/profile"
+              className="px-3 py-2 bg-blue-700 hover:bg-blue-800 rounded transition text-sm"
+            >
+              Profile
+            </Link>
             <button
               onClick={handleLogout}
               className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded transition"
@@ -232,7 +248,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-6 mb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link
@@ -272,6 +288,63 @@ export default function AdminDashboard() {
             </Link>
           </div>
         </div>
+
+        {/* Performance Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Booking Growth</h3>
+              <span className="text-green-600 font-bold">{trends.bookingTrend}</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="bg-green-600 h-2 rounded-full" style={{width: '75%'}}></div>
+            </div>
+            <p className="text-xs text-gray-600 mt-2">vs last month</p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Revenue Growth</h3>
+              <span className="text-blue-600 font-bold">{trends.revenueTrend}</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="bg-blue-600 h-2 rounded-full" style={{width: '60%'}}></div>
+            </div>
+            <p className="text-xs text-gray-600 mt-2">vs last month</p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">User Growth</h3>
+              <span className="text-purple-600 font-bold">{trends.userTrend}</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="bg-purple-600 h-2 rounded-full" style={{width: '45%'}}></div>
+            </div>
+            <p className="text-xs text-gray-600 mt-2">vs last month</p>
+          </div>
+        </div>
+
+        {/* Activity Feed */}
+        {activityLog.length > 0 && (
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
+            <div className="space-y-4">
+              {activityLog.map((activity, idx) => (
+                <div key={idx} className="flex items-start gap-4 pb-4 border-b last:border-b-0">
+                  <div className="flex-shrink-0 w-2 h-2 rounded-full bg-blue-600 mt-2"></div>
+                  <div className="flex-grow">
+                    <p className="text-sm font-medium text-gray-900">{activity.action}</p>
+                    <p className="text-xs text-gray-600 mt-1">{activity.details}</p>
+                  </div>
+                  <span className="text-xs text-gray-500 whitespace-nowrap">
+                    {new Date(activity.timestamp).toLocaleTimeString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

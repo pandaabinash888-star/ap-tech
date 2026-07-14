@@ -14,6 +14,9 @@ interface Technician {
   rating: number;
   status: 'active' | 'inactive';
   joinDate: string;
+  completedJobs?: number;
+  totalEarnings?: number;
+  avgResponseTime?: number;
 }
 
 export default function TechniciansManagement() {
@@ -219,6 +222,23 @@ export default function TechniciansManagement() {
                     <p className="font-semibold">⭐ {tech.rating}</p>
                   </div>
                 </div>
+
+                {tech.completedJobs !== undefined && (
+                  <div className="grid grid-cols-3 gap-2 mb-4 text-xs bg-gray-50 p-2 rounded">
+                    <div>
+                      <p className="text-gray-600">Jobs</p>
+                      <p className="font-semibold">{tech.completedJobs}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Earnings</p>
+                      <p className="font-semibold">₹{tech.totalEarnings}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Response</p>
+                      <p className="font-semibold">{tech.avgResponseTime}min</p>
+                    </div>
+                  </div>
+                )}
 
                 <div className="mb-4">
                   <span
