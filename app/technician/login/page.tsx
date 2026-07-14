@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { TechnicianAuthService } from '@/lib/technician-auth-service';
 
 export default function TechnicianLogin() {
   const router = useRouter();
@@ -26,20 +27,25 @@ export default function TechnicianLogin() {
 
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Demo technician credentials
-    const technicianEmails = ['john.tech@gmail.com', 'sarah.repair@gmail.com', 'mike.service@gmail.com'];
-    const technicianPassword = 'tech123';
+    // Verify credentials using the TechnicianAuthService
+    const credentials = TechnicianAuthService.verifyLogin(email, password);
 
-    if (technicianEmails.includes(email) && password === technicianPassword) {
+    if (credentials) {
+      // Fetch full technician details from admin-created technician list
+      const technicians = JSON.parse(localStorage.getItem('technicians') || '[]');
+      const technicianDetails = technicians.find((t: any) => t.email === email);
+
       const technicianData = {
-        id: `tech_${Date.now()}`,
-        name: email.split('@')[0].replace('.', ' ').toUpperCase(),
+        id: credentials.id,
+        name: credentials.name,
         email: email,
         role: 'technician',
-        phone: '+91-98765-43210',
-        specializations: ['AC Repair', 'Refrigerator Service', 'Washing Machine Repair'],
-        rating: 4.8,
-        completedJobs: 127,
+        phone: technicianDetails?.phone || '+91-98765-43210',
+        specializations: technicianDetails?.specializations || ['AC Repair', 'Refrigerator Service'],
+        experience: technicianDetails?.experience || 0,
+        rating: technicianDetails?.rating || 4.5,
+        completedJobs: technicianDetails?.completedJobs || 0,
+        totalEarnings: technicianDetails?.totalEarnings || 0,
         loginTime: new Date().toISOString(),
       };
       localStorage.setItem('technicianUser', JSON.stringify(technicianData));

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { TechnicianAuthService } from '@/lib/technician-auth-service';
 
 interface Technician {
   id: string;
@@ -28,6 +29,7 @@ export default function TechniciansManagement() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    password: '',
     phone: '',
     specializations: [] as string[],
     experience: 0,
@@ -53,6 +55,7 @@ export default function TechniciansManagement() {
     setFormData({
       name: '',
       email: '',
+      password: '',
       phone: '',
       specializations: [],
       experience: 0,
@@ -66,6 +69,7 @@ export default function TechniciansManagement() {
     setFormData({
       name: tech.name,
       email: tech.email,
+      password: (tech as any).password || '',
       phone: tech.phone,
       specializations: tech.specializations,
       experience: tech.experience,
@@ -75,8 +79,8 @@ export default function TechniciansManagement() {
   };
 
   const handleSave = () => {
-    if (!formData.name || !formData.email || !formData.phone) {
-      alert('Please fill all fields');
+    if (!formData.name || !formData.email || !formData.password || !formData.phone) {
+      alert('Please fill all fields including password');
       return;
     }
 
@@ -88,6 +92,14 @@ export default function TechniciansManagement() {
       );
       setTechnicians(updated);
       localStorage.setItem('technicians', JSON.stringify(updated));
+      
+      // Update credentials in auth service
+      TechnicianAuthService.saveTechnicianCredentials({
+        id: editingId,
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
+      });
     } else {
       const newTech: Technician = {
         id: `tech_${Date.now()}`,
@@ -98,6 +110,14 @@ export default function TechniciansManagement() {
       const updated = [...technicians, newTech];
       setTechnicians(updated);
       localStorage.setItem('technicians', JSON.stringify(updated));
+      
+      // Save credentials to auth service
+      TechnicianAuthService.saveTechnicianCredentials({
+        id: newTech.id,
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
+      });
     }
     setShowModal(false);
   };
@@ -316,6 +336,19 @@ export default function TechniciansManagement() {
                   />
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                  <input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    placeholder="Create a secure password"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
                   <input
                     type="tel"
@@ -325,6 +358,7 @@ export default function TechniciansManagement() {
                     placeholder="+91 9876543210"
                   />
                 </div>
+                <div></div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
