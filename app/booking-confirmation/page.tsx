@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { NotificationService } from '@/lib/notifications';
 
-export default function BookingConfirmation() {
+function BookingConfirmationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const bookingId = searchParams.get('id');
@@ -39,7 +39,13 @@ export default function BookingConfirmation() {
   };
 
   if (!booking) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Loading booking details...</p>
+        </div>
+      </div>
+    );
   }
 
   const service = services[booking.service];
@@ -188,5 +194,13 @@ export default function BookingConfirmation() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function BookingConfirmation() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p>Loading...</p></div>}>
+      <BookingConfirmationContent />
+    </Suspense>
   );
 }

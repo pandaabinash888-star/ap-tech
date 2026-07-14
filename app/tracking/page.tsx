@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function TrackingScreen() {
+function TrackingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const bookingId = searchParams.get('id');
@@ -311,5 +311,13 @@ export default function TrackingScreen() {
         </div>
       </nav>
     </div>
+  );
+}
+
+export default function TrackingScreen() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p>Loading...</p></div>}>
+      <TrackingContent />
+    </Suspense>
   );
 }
