@@ -19,8 +19,27 @@ export default function UserDashboard() {
     }
     setUser(JSON.parse(userData));
 
+    // Load user bookings and sync with admin bookings if they exist
     const userBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
-    setBookings(userBookings);
+    const adminBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+    const technicians = JSON.parse(localStorage.getItem('technicians') || '[]');
+    
+    // Merge admin booking data (including technician assignments) with user bookings
+    const mergedBookings = userBookings.map((userBooking: any) => {
+      const adminBooking = adminBookings.find((b: any) => b.id === userBooking.id);
+      if (adminBooking && adminBooking.assignedTechnician) {
+        const technicianData = technicians.find((t: any) => t.name === adminBooking.assignedTechnician);
+        return {
+          ...userBooking,
+          assignedTechnician: adminBooking.assignedTechnician,
+          technicianDetails: technicianData,
+          status: adminBooking.status || userBooking.status,
+        };
+      }
+      return userBooking;
+    });
+    
+    setBookings(mergedBookings);
   }, [router]);
 
   const handleLogout = () => {
@@ -217,6 +236,70 @@ Thank you for using AP TECH!
                             <p className="font-medium">₹{booking.amount || 'Pending'}</p>
                           </div>
                         </div>
+
+                        {/* Technician Information */}
+                        {booking.assignedTechnician && (
+                          <div className="mb-4 p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200">
+                            <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                              <span className="w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm">👨‍🔧</span>
+                              Assigned Technician
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <p className="text-slate-600 text-xs mb-1">Technician Name</p>
+                                <p className="font-semibold text-slate-900">{booking.assignedTechnician}</p>
+                              </div>
+                              {booking.technicianDetails?.experience && (
+                                <div>
+                                  <p className="text-slate-600 text-xs mb-1">Experience</p>
+                                  <p className="font-semibold text-slate-900">{booking.technicianDetails.experience} years</p>
+                                </div>
+                              )}
+                              {booking.technicianDetails?.phone && (
+                                <div>
+                                  <p className="text-slate-600 text-xs mb-1">Phone</p>
+                                  <p className="font-semibold text-slate-900">{booking.technicianDetails.phone}</p>
+                                </div>
+                              )}
+                              {booking.technicianDetails?.email && (
+                                <div>
+                                  <p className="text-slate-600 text-xs mb-1">Email</p>
+                                  <p className="font-semibold text-slate-900 break-all">{booking.technicianDetails.email}</p>
+                                </div>
+                              )}
+                              {booking.technicianDetails?.specializations && booking.technicianDetails.specializations.length > 0 && (
+                                <div className="md:col-span-2">
+                                  <p className="text-slate-600 text-xs mb-1">Specializations</p>
+                                  <div className="flex flex-wrap gap-2">
+                                    {booking.technicianDetails.specializations.map((spec: string, idx: number) => (
+                                      <span key={idx} className="px-2 py-1 bg-orange-600 text-white text-xs rounded-full">
+                                        {spec}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            <div className="mt-4 flex gap-2">
+                              {booking.technicianDetails?.phone && (
+                                <a
+                                  href={`tel:${booking.technicianDetails.phone}`}
+                                  className="px-4 py-2 text-sm bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition"
+                                >
+                                  Call Technician
+                                </a>
+                              )}
+                              {booking.technicianDetails?.email && (
+                                <a
+                                  href={`mailto:${booking.technicianDetails.email}`}
+                                  className="px-4 py-2 text-sm bg-slate-200 text-slate-900 rounded-lg hover:bg-slate-300 transition"
+                                >
+                                  Email Technician
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        )}
 
                         <div className="flex gap-2">
                           {booking.status === 'completed' && (
