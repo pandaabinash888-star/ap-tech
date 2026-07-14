@@ -21,46 +21,28 @@ export default function TechnicianDashboard() {
   }, [router]);
 
   const loadJobs = () => {
-    const mockJobs = [
-      {
-        id: 'JOB001',
-        customerName: 'Rajesh Kumar',
-        service: 'AC Repair',
-        location: '123 Main St, Downtown',
-        date: new Date().toLocaleDateString(),
-        time: '10:00 AM',
-        status: 'assigned',
-        priority: 'high',
-        description: 'AC not cooling properly',
-        phone: '+91-99999-00000',
-      },
-      {
-        id: 'JOB002',
-        customerName: 'Priya Singh',
-        service: 'Refrigerator Service',
-        location: '456 Oak Ave, Uptown',
-        date: new Date().toLocaleDateString(),
-        time: '2:30 PM',
-        status: 'assigned',
-        priority: 'medium',
-        description: 'Strange noise from compressor',
-        phone: '+91-98888-11111',
-      },
-      {
-        id: 'JOB003',
-        customerName: 'Amit Patel',
-        service: 'Washing Machine Repair',
-        location: '789 Elm St, Midtown',
-        date: new Date(Date.now() - 86400000).toLocaleDateString(),
-        time: '11:00 AM',
-        status: 'completed',
-        priority: 'low',
-        description: 'Water leak from bottom',
-        phone: '+91-97777-22222',
-        earnings: 500,
-      },
-    ];
-    setJobs(mockJobs);
+    const techData = JSON.parse(localStorage.getItem('technicianUser') || 'null');
+    const allBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+    
+    // Filter bookings assigned to this technician
+    const assignedJobs = allBookings.filter((booking: any) => 
+      booking.assignedTechnician === techData?.name
+    ).map((booking: any) => ({
+      id: booking.id,
+      customerName: booking.customerName,
+      service: booking.serviceName,
+      location: booking.location,
+      date: booking.date || new Date().toLocaleDateString(),
+      time: booking.time || '10:00 AM',
+      status: booking.status === 'confirmed' || booking.status === 'assigned' ? 'assigned' : booking.status,
+      priority: booking.priority || 'medium',
+      description: booking.description || booking.serviceDetails || 'Service appointment',
+      phone: booking.phone,
+      cost: booking.totalCost || 0,
+      earnings: booking.totalCost || 0, // Earnings = cost for now
+    }));
+    
+    setJobs(assignedJobs);
   };
 
   const handleLogout = () => {
@@ -104,6 +86,10 @@ export default function TechnicianDashboard() {
     jobs
   );
 
+  const completedJobs = jobs.filter(j => j.status === 'completed');
+  const totalRevenue = completedJobs.reduce((sum, job) => sum + (job.earnings || 0), 0);
+  const assignedCount = jobs.filter(j => j.status === 'assigned').length;
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -129,20 +115,20 @@ export default function TechnicianDashboard() {
         {/* Profile Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-gray-600 text-sm font-medium mb-2">Name</h3>
-            <p className="text-2xl font-bold text-gray-900">{technician.name}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-gray-600 text-sm font-medium mb-2">Rating</h3>
-            <p className="text-2xl font-bold text-gray-900">⭐ {technician.rating}</p>
+            <h3 className="text-gray-600 text-sm font-medium mb-2">Assigned Jobs</h3>
+            <p className="text-3xl font-bold text-orange-600">{assignedCount}</p>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-gray-600 text-sm font-medium mb-2">Completed Jobs</h3>
-            <p className="text-2xl font-bold text-gray-900">{technician.completedJobs}</p>
+            <p className="text-3xl font-bold text-green-600">{completedJobs.length}</p>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-gray-600 text-sm font-medium mb-2">Phone</h3>
-            <p className="text-sm text-gray-900 font-mono">{technician.phone}</p>
+            <h3 className="text-gray-600 text-sm font-medium mb-2">Total Revenue</h3>
+            <p className="text-3xl font-bold text-blue-600">₹{totalRevenue}</p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-gray-600 text-sm font-medium mb-2">Rating</h3>
+            <p className="text-2xl font-bold text-gray-900">⭐ {technician.rating || 4.5}</p>
           </div>
         </div>
 
@@ -264,6 +250,41 @@ export default function TechnicianDashboard() {
             )}
           </div>
         </div>
+
+        {/* Revenue Summary */}
+        {completedJobs.length > 0 && (
+          <div className="mt-8 bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Revenue Breakdown</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold text-gray-700">Job ID</th>
+                    <th className="px-4 py-3 font-semibold text-gray-700">Customer</th>
+                    <th className="px-4 py-3 font-semibold text-gray-700">Service</th>
+                    <th className="px-4 py-3 font-semibold text-gray-700">Date</th>
+                    <th className="px-4 py-3 font-semibold text-gray-700">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {completedJobs.map(job => (
+                    <tr key={job.id} className="border-b hover:bg-gray-50">
+                      <td className="px-4 py-3 font-mono text-gray-600">{job.id}</td>
+                      <td className="px-4 py-3 text-gray-900">{job.customerName}</td>
+                      <td className="px-4 py-3 text-gray-600">{job.service}</td>
+                      <td className="px-4 py-3 text-gray-600">{job.date}</td>
+                      <td className="px-4 py-3 font-bold text-green-600">₹{job.earnings}</td>
+                    </tr>
+                  ))}
+                  <tr className="bg-green-50 font-bold">
+                    <td colSpan={4} className="px-4 py-3 text-gray-900">Total Revenue</td>
+                    <td className="px-4 py-3 text-green-700 text-lg">₹{totalRevenue}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
