@@ -17,8 +17,23 @@ function BookingConfirmationContent() {
       return;
     }
 
-    const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-    const foundBooking = bookings.find((b: any) => b.id === bookingId);
+    // Try to get from user bookings first, then admin bookings
+    const userBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+    const adminBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+    
+    let foundBooking = userBookings.find((b: any) => b.id === bookingId);
+    
+    // If not in user bookings, check admin bookings (for when accessed from different flow)
+    if (!foundBooking) {
+      foundBooking = adminBookings.find((b: any) => b.id === bookingId);
+    } else {
+      // Merge admin booking data if it exists
+      const adminBooking = adminBookings.find((b: any) => b.id === bookingId);
+      if (adminBooking) {
+        foundBooking = { ...foundBooking, ...adminBooking };
+      }
+    }
+    
     if (foundBooking) {
       setBooking(foundBooking);
       

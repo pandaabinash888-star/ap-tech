@@ -13,13 +13,21 @@ export default function OrdersScreen() {
   const [activeTab, setActiveTab] = useState('all');
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = localStorage.getItem('userData');
     if (!userData) {
       router.push('/login');
     } else {
       setUser(JSON.parse(userData));
-      const storedBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-      setBookings(storedBookings);
+      const userBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+      const adminBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+      
+      // Merge user bookings with admin booking data (like technician assignments)
+      const mergedBookings = userBookings.map((userBooking: any) => {
+        const adminBooking = adminBookings.find((b: any) => b.id === userBooking.id);
+        return { ...userBooking, ...adminBooking };
+      });
+      
+      setBookings(mergedBookings);
     }
   }, [router]);
 
@@ -54,7 +62,17 @@ export default function OrdersScreen() {
     : bookings.filter(b => b.status === activeTab);
 
   if (!user) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Please Log In</h2>
+          <p className="text-gray-600 mb-4">Sign in to view your orders</p>
+          <Link href="/login" className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            Go to Login
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
