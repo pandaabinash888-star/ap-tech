@@ -438,7 +438,11 @@ function BookingContent() {
 
 export default function BookingScreen() {
   return (
+<<<<<<< HEAD
     <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+=======
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p>Loading...</p></div>}>
+>>>>>>> origin/main
       <BookingContent />
     </Suspense>
   );

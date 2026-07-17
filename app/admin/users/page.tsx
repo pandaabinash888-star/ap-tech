@@ -102,24 +102,27 @@ export default function UsersManagement() {
       {/* Navigation */}
       <nav className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex gap-6">
-            <Link href="/admin/dashboard" className="py-3 px-2 hover:text-blue-600 text-gray-600">
+          <div className="flex gap-6 overflow-x-auto">
+            <Link href="/admin/dashboard" className="py-3 px-2 hover:text-blue-600 text-gray-600 whitespace-nowrap">
               Dashboard
             </Link>
-            <Link href="/admin/bookings" className="py-3 px-2 hover:text-blue-600 text-gray-600">
+            <Link href="/admin/bookings" className="py-3 px-2 hover:text-blue-600 text-gray-600 whitespace-nowrap">
               Bookings
             </Link>
-            <Link href="/admin/technicians" className="py-3 px-2 hover:text-blue-600 text-gray-600">
+            <Link href="/admin/technicians" className="py-3 px-2 hover:text-blue-600 text-gray-600 whitespace-nowrap">
               Technicians
             </Link>
-            <Link href="/admin/services" className="py-3 px-2 hover:text-blue-600 text-gray-600">
+            <Link href="/admin/services" className="py-3 px-2 hover:text-blue-600 text-gray-600 whitespace-nowrap">
               Services
             </Link>
-            <Link href="/admin/users" className="py-3 px-2 border-b-2 border-blue-600 text-blue-600 font-medium">
+            <Link href="/admin/users" className="py-3 px-2 border-b-2 border-blue-600 text-blue-600 font-medium whitespace-nowrap">
               Users
             </Link>
-            <Link href="/admin/analytics" className="py-3 px-2 hover:text-blue-600 text-gray-600">
+            <Link href="/admin/analytics" className="py-3 px-2 hover:text-blue-600 text-gray-600 whitespace-nowrap">
               Analytics
+            </Link>
+            <Link href="/admin/settings" className="py-3 px-2 hover:text-blue-600 text-gray-600 whitespace-nowrap">
+              Settings
             </Link>
           </div>
         </div>
