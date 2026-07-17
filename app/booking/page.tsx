@@ -1,8 +1,10 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { PaymentMethods } from '@/components/payment-methods';
+import { paymentGateway, PaymentMethod } from '@/lib/payment-gateway';
 
 function BookingContent() {
   const router = useRouter();
@@ -11,6 +13,9 @@ function BookingContent() {
 
   const [step, setStep] = useState(1);
   const [user, setUser] = useState<any>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [bookingData, setBookingData] = useState({
     service: '',
     date: '',
@@ -47,6 +52,9 @@ function BookingContent() {
         phone: user.phone || '',
       }));
     }
+    
+    // Load payment methods
+    setPaymentMethods(paymentGateway.getPaymentMethods());
   }, [router, serviceId]);
 
   const whatsappNumber = '8817660170';
@@ -62,20 +70,58 @@ function BookingContent() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Store booking data
-    const booking = {
-      ...bookingData,
-      id: Date.now().toString(),
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-    };
-    const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-    bookings.push(booking);
-    localStorage.setItem('bookings', JSON.stringify(bookings));
     
-    router.push(`/booking-confirmation?id=${booking.id}`);
+    if (!selectedPaymentMethod) {
+      alert('Please select a payment method');
+      return;
+    }
+
+    setIsProcessing(true);
+    
+    try {
+      // Store booking data
+      const booking = {
+        ...bookingData,
+        id: Date.now().toString(),
+        status: 'pending',
+        paymentMethod: selectedPaymentMethod.name,
+        paymentProvider: selectedPaymentMethod.provider,
+        createdAt: new Date().toISOString(),
+      };
+      
+      const selectedSvc = services.find(s => s.id === parseInt(bookingData.service));
+      const totalAmount = (selectedSvc?.price || 0) + 199; // Service + visit charge
+
+      // Process payment based on selected method
+      let paymentResult;
+      if (selectedPaymentMethod.provider === 'stripe') {
+        paymentResult = await paymentGateway.processStripePayment(totalAmount, booking.id, 'demo_token');
+      } else if (selectedPaymentMethod.provider === 'razorpay') {
+        paymentResult = await paymentGateway.processRazorpayPayment(totalAmount, booking.id, selectedPaymentMethod.type);
+      } else if (selectedPaymentMethod.provider === 'paypal') {
+        paymentResult = await paymentGateway.processPayPalPayment(totalAmount, booking.id);
+      }
+
+      if (paymentResult?.success) {
+        booking.status = 'confirmed';
+        booking.paymentId = paymentResult.paymentId;
+        booking.transactionId = paymentResult.transactionId;
+        
+        const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+        bookings.push(booking);
+        localStorage.setItem('bookings', JSON.stringify(bookings));
+        
+        router.push(`/booking-confirmation?id=${booking.id}`);
+      } else {
+        alert('Payment failed: ' + (paymentResult?.message || 'Unknown error'));
+      }
+    } catch (error) {
+      alert('Error processing booking: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (!user) {
@@ -117,23 +163,23 @@ function BookingContent() {
 
         {/* Progress Bar */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold ${step >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'}`}>
-              1
-            </div>
-            <div className={`flex-1 h-1 mx-2 ${step > 1 ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
-            <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold ${step >= 2 ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'}`}>
-              2
-            </div>
-            <div className={`flex-1 h-1 mx-2 ${step > 2 ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
-            <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold ${step >= 3 ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'}`}>
-              3
-            </div>
+          <div className="flex justify-between items-center mb-4">
+            <span className={`text-sm font-semibold ${step >= 1 ? 'text-blue-600' : 'text-gray-400'}`}>Service</span>
+            <span className={`text-sm font-semibold ${step >= 2 ? 'text-blue-600' : 'text-gray-400'}`}>Date & Time</span>
+            <span className={`text-sm font-semibold ${step >= 3 ? 'text-blue-600' : 'text-gray-400'}`}>Details</span>
+            <span className={`text-sm font-semibold ${step >= 4 ? 'text-blue-600' : 'text-gray-400'}`}>Payment</span>
+          </div>
+          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-blue-600 transition-all duration-300"
+              style={{ width: `${(step / 4) * 100}%` }}
+            ></div>
           </div>
           <div className="flex justify-between text-xs text-gray-600">
             <span>Service</span>
+            <span>Date & Time</span>
             <span>Details</span>
-            <span>Confirm</span>
+            <span>Payment</span>
           </div>
         </div>
 
@@ -323,10 +369,63 @@ function BookingContent() {
                   Back
                 </button>
                 <button
-                  type="submit"
-                  className="flex-1 bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                  type="button"
+                  onClick={() => setStep(4)}
+                  disabled={!bookingData.address || !bookingData.phone}
+                  className="flex-1 bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                 >
-                  Confirm Booking
+                  Continue to Payment
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Payment Method */}
+          {step === 4 && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">Select Payment Method</h2>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <h3 className="font-bold text-gray-800 mb-4">Order Summary</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">{selectedService?.name}:</span>
+                    <span className="font-semibold">₹{selectedService?.price}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Visit Charge:</span>
+                    <span className="font-semibold">₹199</span>
+                  </div>
+                  <div className="flex justify-between text-lg font-bold mt-3 pt-2 border-t border-blue-200">
+                    <span>Total:</span>
+                    <span className="text-blue-600">₹{(selectedService?.price || 0) + 199}</span>
+                  </div>
+                </div>
+              </div>
+
+              <PaymentMethods
+                methods={paymentMethods}
+                selectedMethod={selectedPaymentMethod}
+                onSelect={setSelectedPaymentMethod}
+                isProcessing={isProcessing}
+                amount={(selectedService?.price || 0) + 199}
+              />
+
+              <div className="flex gap-4 mt-8">
+                <button
+                  type="button"
+                  onClick={() => setStep(3)}
+                  disabled={isProcessing}
+                  className="flex-1 border-2 border-gray-300 text-gray-800 font-semibold py-3 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={!selectedPaymentMethod || isProcessing}
+                  className="flex-1 bg-green-600 text-white font-semibold py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                >
+                  {isProcessing ? 'Processing Payment...' : 'Pay & Confirm Booking'}
                 </button>
               </div>
             </div>
@@ -339,7 +438,11 @@ function BookingContent() {
 
 export default function BookingScreen() {
   return (
+<<<<<<< HEAD
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+=======
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p>Loading...</p></div>}>
+>>>>>>> origin/main
       <BookingContent />
     </Suspense>
   );
