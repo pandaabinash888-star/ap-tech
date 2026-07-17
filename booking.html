@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP TECH - Book Service</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            padding: 2rem 1rem;
+            min-height: 100vh;
+        }
+        
+        .booking-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        
+        .booking-header {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .booking-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .booking-header p {
+            opacity: 0.9;
+        }
+        
+        .progress-bar {
+            padding: 1.5rem;
+            background: #f9fafb;
+        }
+        
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        
+        .step {
+            text-align: center;
+            flex: 1;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 0.5rem;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #9ca3af;
+            transition: all 0.3s;
+        }
+        
+        .step.active .step-circle {
+            background: #2563eb;
+            color: white;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+        
+        .step.completed .step-circle {
+            background: #10b981;
+            color: white;
+        }
+        
+        .step-label {
+            font-size: 0.85rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .progress-line {
+            position: absolute;
+            top: 20px;
+            left: 5%;
+            right: 5%;
+            height: 2px;
+            background: #e5e7eb;
+            z-index: 1;
+        }
+        
+        .booking-content {
+            padding: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .service-option {
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .service-option:hover {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+        
+        .service-option.selected {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+        
+        .service-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .service-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+        
+        .service-price {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+        
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+        
+        .payment-option {
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .payment-option:hover {
+            border-color: #2563eb;
+        }
+        
+        .payment-option.selected {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+        
+        .summary {
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            color: #6b7280;
+        }
+        
+        .summary-row.total {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 0.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 1.1rem;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+        
+        button {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        
+        .btn-back {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+        
+        .btn-back:hover {
+            background: #d1d5db;
+        }
+        
+        .btn-next {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .btn-next:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-next:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .step-content {
+            display: none;
+        }
+        
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .booking-container {
+                border-radius: 0;
+            }
+            
+            .progress-steps {
+                gap: 0.5rem;
+            }
+            
+            .step-label {
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="booking-container">
+        <div class="booking-header">
+            <h1>Book Your Service</h1>
+            <p>Professional repair service at your doorstep</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-steps">
+                <div class="progress-line"></div>
+                <div class="step active completed" data-step="1">
+                    <div class="step-circle">✓</div>
+                    <div class="step-label">Service</div>
+                </div>
+                <div class="step active completed" data-step="2">
+                    <div class="step-circle">✓</div>
+                    <div class="step-label">Date & Time</div>
+                </div>
+                <div class="step active" data-step="3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Details</div>
+                </div>
+                <div class="step" data-step="4">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Payment</div>
+                </div>
+            </div>
+        </div>
+        
+        <form class="booking-content" onsubmit="handleBooking(event)">
+            <!-- Step 1: Service Selection -->
+            <div class="step-content active" id="step-1">
+                <h2 style="margin-bottom: 1rem;">Select Service</h2>
+                <div class="service-grid">
+                    <div class="service-option selected" onclick="selectService(this, 'mobile', '₹349')">
+                        <div class="service-icon">📱</div>
+                        <div class="service-name">Mobile</div>
+                        <div class="service-price">₹149+</div>
+                    </div>
+                    <div class="service-option" onclick="selectService(this, 'laptop', '₹399')">
+                        <div class="service-icon">💻</div>
+                        <div class="service-name">Laptop</div>
+                        <div class="service-price">₹199+</div>
+                    </div>
+                    <div class="service-option" onclick="selectService(this, 'desktop', '₹449')">
+                        <div class="service-icon">🖥️</div>
+                        <div class="service-name">Desktop</div>
+                        <div class="service-price">₹249+</div>
+                    </div>
+                    <div class="service-option" onclick="selectService(this, 'battery', '₹399')">
+                        <div class="service-icon">🔋</div>
+                        <div class="service-name">Battery</div>
+                        <div class="service-price">₹299+</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 3: Details -->
+            <div class="step-content" id="step-3">
+                <h2 style="margin-bottom: 1rem;">Booking Details</h2>
+                
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" placeholder="John Doe" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" placeholder="+91 9876543210" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" placeholder="john@example.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Service Address</label>
+                    <textarea placeholder="Enter your complete address" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Additional Notes (Optional)</label>
+                    <textarea placeholder="Any specific issues or instructions" rows="2"></textarea>
+                </div>
+            </div>
+            
+            <!-- Step 4: Payment -->
+            <div class="step-content" id="step-4">
+                <h2 style="margin-bottom: 1rem;">Select Payment Method</h2>
+                
+                <div class="summary">
+                    <div class="summary-row">
+                        <span>Selected Service:</span>
+                        <span id="summary-service">Mobile Repair</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Service Charge:</span>
+                        <span id="summary-price">₹349</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Visit Charge:</span>
+                        <span>₹199</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total Amount:</span>
+                        <span id="total-amount">₹548</span>
+                    </div>
+                </div>
+                
+                <h3 style="margin-bottom: 1rem; font-size: 1rem;">Payment Methods</h3>
+                <div class="payment-methods">
+                    <div class="payment-option selected" onclick="selectPayment(this, 'stripe')">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">💳</div>
+                        <div>Card</div>
+                    </div>
+                    <div class="payment-option" onclick="selectPayment(this, 'razorpay')">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📱</div>
+                        <div>UPI</div>
+                    </div>
+                    <div class="payment-option" onclick="selectPayment(this, 'paypal')">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏦</div>
+                        <div>Wallet</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button type="button" class="btn-back" onclick="previousStep()">Back</button>
+                <button type="button" class="btn-next" onclick="nextStep()" id="next-btn">Next</button>
+                <button type="submit" class="btn-next" style="display: none;" id="submit-btn">Confirm Booking</button>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        let currentStep = 3;
+        let selectedService = 'mobile';
+        let selectedPrice = '₹349';
+        let selectedPayment = 'stripe';
+        
+        function selectService(element, service, price) {
+            document.querySelectorAll('.service-option').forEach(el => {
+                el.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            selectedService = service;
+            selectedPrice = price;
+            document.getElementById('summary-service', service).textContent = element.querySelector('.service-name').textContent + ' Repair';
+            document.getElementById('summary-price').textContent = price;
+            updateTotal();
+        }
+        
+        function selectPayment(element, method) {
+            document.querySelectorAll('.payment-option').forEach(el => {
+                el.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            selectedPayment = method;
+        }
+        
+        function updateTotal() {
+            const basePrice = parseInt(selectedPrice.replace('₹', ''));
+            const total = basePrice + 199;
+            document.getElementById('total-amount').textContent = '₹' + total;
+        }
+        
+        function nextStep() {
+            if (currentStep < 4) {
+                document.getElementById('step-' + currentStep).classList.remove('active');
+                currentStep++;
+                document.getElementById('step-' + currentStep).classList.add('active');
+                updateSteps();
+                
+                if (currentStep === 4) {
+                    document.getElementById('next-btn').style.display = 'none';
+                    document.getElementById('submit-btn').style.display = 'block';
+                }
+            }
+        }
+        
+        function previousStep() {
+            if (currentStep > 1) {
+                document.getElementById('step-' + currentStep).classList.remove('active');
+                currentStep--;
+                document.getElementById('step-' + currentStep).classList.add('active');
+                updateSteps();
+                
+                if (currentStep < 4) {
+                    document.getElementById('next-btn').style.display = 'block';
+                    document.getElementById('submit-btn').style.display = 'none';
+                }
+            }
+        }
+        
+        function updateSteps() {
+            document.querySelectorAll('.step').forEach((step, index) => {
+                const stepNum = index + 1;
+                if (stepNum < currentStep) {
+                    step.classList.add('completed');
+                    step.classList.remove('active');
+                } else if (stepNum === currentStep) {
+                    step.classList.add('active');
+                    step.classList.remove('completed');
+                } else {
+                    step.classList.remove('active', 'completed');
+                }
+            });
+        }
+        
+        function handleBooking(e) {
+            e.preventDefault();
+            alert(`✅ Booking Confirmed!\n\nService: ${selectedService.toUpperCase()}\nPayment Method: ${selectedPayment}\nTotal: ${document.getElementById('total-amount').textContent}\n\nThank you for booking AP TECH!`);
+            window.location.href = 'booking-confirmation.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP TECH - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+        
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 260px;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .sidebar-logo {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+        }
+        
+        .sidebar-item {
+            padding: 0.75rem 1.5rem;
+            margin: 0.25rem 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #6b7280;
+            border-left: 4px solid transparent;
+        }
+        
+        .sidebar-item:hover {
+            background: #f9fafb;
+            color: #2563eb;
+            border-left-color: #2563eb;
+        }
+        
+        .sidebar-item.active {
+            background: #eff6ff;
+            color: #2563eb;
+            border-left-color: #2563eb;
+            font-weight: 600;
+        }
+        
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 2rem;
+        }
+        
+        .header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 1.75rem;
+            color: #1f2937;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid #2563eb;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        .stat-change {
+            color: #10b981;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: #f9fafb;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #6b7280;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        tr:hover {
+            background: #f9fafb;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-confirmed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+        
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            
+            .main-content {
+                margin-left: 200px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .sidebar {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">AP TECH</div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-item active" onclick="switchTab('dashboard')">📊 Dashboard</li>
+                <li class="sidebar-item" onclick="switchTab('bookings')">📅 Bookings</li>
+                <li class="sidebar-item" onclick="switchTab('technicians')">👨‍🔧 Technicians</li>
+                <li class="sidebar-item" onclick="switchTab('services')">🛠️ Services</li>
+                <li class="sidebar-item" onclick="switchTab('users')">👥 Users</li>
+                <li class="sidebar-item" onclick="switchTab('analytics')">📈 Analytics</li>
+                <li class="sidebar-item" onclick="logout()">🚪 Logout</li>
+            </ul>
+        </aside>
+        
+        <main class="main-content">
+            <div class="header">
+                <h1 id="pageTitle">Dashboard</h1>
+                <div class="header-right">
+                    <span>Welcome, Admin</span>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </div>
+            
+            <!-- Dashboard Tab -->
+            <div id="dashboard-tab">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Bookings</div>
+                        <div class="stat-value">247</div>
+                        <div class="stat-change">↑ 12% from last month</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Completed Services</div>
+                        <div class="stat-value">189</div>
+                        <div class="stat-change">↑ 8% from last month</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Pending Bookings</div>
+                        <div class="stat-value">32</div>
+                        <div class="stat-change">↓ 5% from last month</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Monthly Revenue</div>
+                        <div class="stat-value">₹1,24,560</div>
+                        <div class="stat-change">↑ 15% from last month</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2>Recent Bookings</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Customer</th>
+                                <th>Service</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#BK001</td>
+                                <td>Rajesh Kumar</td>
+                                <td>Mobile Repair</td>
+                                <td>2026-07-11</td>
+                                <td><span class="status-badge status-confirmed">Confirmed</span></td>
+                                <td>₹348</td>
+                            </tr>
+                            <tr>
+                                <td>#BK002</td>
+                                <td>Priya Sharma</td>
+                                <td>Laptop Repair</td>
+                                <td>2026-07-11</td>
+                                <td><span class="status-badge status-pending">Pending</span></td>
+                                <td>₹398</td>
+                            </tr>
+                            <tr>
+                                <td>#BK003</td>
+                                <td>Amit Patel</td>
+                                <td>Battery Replacement</td>
+                                <td>2026-07-10</td>
+                                <td><span class="status-badge status-confirmed">Confirmed</span></td>
+                                <td>₹498</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Bookings Tab -->
+            <div id="bookings-tab" style="display: none;">
+                <div class="card">
+                    <h2>All Bookings</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Customer</th>
+                                <th>Service</th>
+                                <th>Date & Time</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#BK001</td>
+                                <td>Rajesh Kumar</td>
+                                <td>Mobile Repair</td>
+                                <td>2026-07-11 10:30 AM</td>
+                                <td><span class="status-badge status-confirmed">Confirmed</span></td>
+                                <td><button class="btn btn-secondary">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>#BK002</td>
+                                <td>Priya Sharma</td>
+                                <td>Laptop Repair</td>
+                                <td>2026-07-11 02:00 PM</td>
+                                <td><span class="status-badge status-pending">Pending</span></td>
+                                <td><button class="btn btn-secondary">View</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Technicians Tab -->
+            <div id="technicians-tab" style="display: none;">
+                <div class="card">
+                    <h2>Team Members</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Specialization</th>
+                                <th>Experience</th>
+                                <th>Rating</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Vikram Singh</td>
+                                <td>Mobile & Laptop</td>
+                                <td>5+ years</td>
+                                <td>⭐ 4.8</td>
+                                <td><span class="status-badge status-confirmed">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>Suresh Kumar</td>
+                                <td>Desktop & Server</td>
+                                <td>7+ years</td>
+                                <td>⭐ 4.9</td>
+                                <td><span class="status-badge status-confirmed">Active</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Services Tab -->
+            <div id="services-tab" style="display: none;">
+                <div class="card">
+                    <h2>Services Offered</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Price</th>
+                                <th>Est. Time</th>
+                                <th>Bookings</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>📱 Mobile Repair</td>
+                                <td>₹149</td>
+                                <td>30-45 mins</td>
+                                <td>89</td>
+                            </tr>
+                            <tr>
+                                <td>💻 Laptop Repair</td>
+                                <td>₹199</td>
+                                <td>45-60 mins</td>
+                                <td>76</td>
+                            </tr>
+                            <tr>
+                                <td>🔋 Battery Replacement</td>
+                                <td>₹299</td>
+                                <td>20-30 mins</td>
+                                <td>42</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Users Tab -->
+            <div id="users-tab" style="display: none;">
+                <div class="card">
+                    <h2>Registered Users</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Bookings</th>
+                                <th>Total Spent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Rajesh Kumar</td>
+                                <td>rajesh@email.com</td>
+                                <td>9876543210</td>
+                                <td>5</td>
+                                <td>₹2,450</td>
+                            </tr>
+                            <tr>
+                                <td>Priya Sharma</td>
+                                <td>priya@email.com</td>
+                                <td>9876543211</td>
+                                <td>3</td>
+                                <td>₹1,200</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Analytics Tab -->
+            <div id="analytics-tab" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Revenue</div>
+                        <div class="stat-value">₹12,45,600</div>
+                        <div class="stat-change">YTD Performance</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Avg Order Value</div>
+                        <div class="stat-value">₹3,480</div>
+                        <div class="stat-change">Per booking</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Customer Satisfaction</div>
+                        <div class="stat-value">98%</div>
+                        <div class="stat-change">Based on ratings</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Repeat Customers</div>
+                        <div class="stat-value">65%</div>
+                        <div class="stat-change">Of total users</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('[id$="-tab"]').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            // Show selected tab
+            const tabElement = document.getElementById(tabName + '-tab');
+            if (tabElement) {
+                tabElement.style.display = 'block';
+            }
+            
+            // Update sidebar active state
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update page title
+            const titles = {
+                'dashboard': 'Dashboard',
+                'bookings': 'Bookings Management',
+                'technicians': 'Technician Management',
+                'services': 'Service Management',
+                'users': 'User Management',
+                'analytics': 'Analytics & Reports'
+            };
+            document.getElementById('pageTitle').textContent = titles[tabName] || 'Dashboard';
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html>
