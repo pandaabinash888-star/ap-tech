@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function TrackingScreen() {
+function TrackingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const bookingId = searchParams.get('id');
@@ -20,15 +20,33 @@ export default function TrackingScreen() {
     }
     setUser(JSON.parse(userData));
 
+    const adminBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+    const technicians = JSON.parse(localStorage.getItem('technicians') || '[]');
+
     if (!bookingId) {
-      const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-      if (bookings.length > 0) {
-        setBooking(bookings[bookings.length - 1]);
+      const userBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+      if (userBookings.length > 0) {
+        const userBooking = userBookings[userBookings.length - 1];
+        const adminBooking = adminBookings.find((b: any) => b.id === userBooking.id);
+        const mergedBooking = { ...userBooking, ...adminBooking };
+        if (mergedBooking.assignedTechnician) {
+          const techData = technicians.find((t: any) => t.name === mergedBooking.assignedTechnician);
+          mergedBooking.technicianDetails = techData;
+        }
+        setBooking(mergedBooking);
       }
     } else {
-      const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-      const found = bookings.find((b: any) => b.id === bookingId);
-      setBooking(found);
+      const userBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+      const userBooking = userBookings.find((b: any) => b.id === bookingId);
+      if (userBooking) {
+        const adminBooking = adminBookings.find((b: any) => b.id === bookingId);
+        const mergedBooking = { ...userBooking, ...adminBooking };
+        if (mergedBooking.assignedTechnician) {
+          const techData = technicians.find((t: any) => t.name === mergedBooking.assignedTechnician);
+          mergedBooking.technicianDetails = techData;
+        }
+        setBooking(mergedBooking);
+      }
     }
   }, [router, bookingId]);
 
@@ -41,12 +59,20 @@ export default function TrackingScreen() {
     '6': { name: 'Software Installation', icon: '⚙️', price: 149 },
   };
 
-  const mockTechnician = {
-    name: 'Raj Kumar',
+  const technician = booking?.technicianDetails ? {
+    name: booking.technicianDetails.name || 'Technician',
+    phone: booking.technicianDetails.phone || '+91 9876543210',
+    rating: booking.technicianDetails.rating || 4.8,
+    reviews: booking.technicianDetails.reviews || 0,
+    experience: booking.technicianDetails.experience ? `${booking.technicianDetails.experience}+ years` : '0+ years',
+    image: '👨‍🔧',
+    specializations: booking.technicianDetails.specializations || [],
+  } : {
+    name: 'Assigned Technician',
     phone: '+91 9876543210',
     rating: 4.8,
-    reviews: 245,
-    experience: '5+ years',
+    reviews: 0,
+    experience: 'Experienced',
     image: '👨‍🔧',
   };
 
@@ -72,8 +98,32 @@ export default function TrackingScreen() {
     }));
   };
 
-  if (!user || !booking) {
-    return null;
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Tracking Service</h2>
+          <p className="text-gray-600 mb-4">Please log in to track your service</p>
+          <Link href="/login" className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            Go to Login
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!booking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">No Active Booking</h2>
+          <p className="text-gray-600 mb-4">You don&apos;t have any active bookings to track</p>
+          <Link href="/home" className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            Go to Home
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   const service = services[booking.service];
@@ -151,27 +201,48 @@ export default function TrackingScreen() {
         </div>
 
         {/* Technician Info */}
-        {booking.status !== 'pending' && (
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-8 mb-8 border border-blue-200">
+        {booking?.assignedTechnician && (
+          <div className="bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl p-8 mb-8 border-2 border-orange-300">
             <h2 className="text-lg font-bold text-gray-800 mb-6">Assigned Technician</h2>
             <div className="flex items-center justify-between flex-wrap gap-6">
-              <div className="flex items-center gap-4">
-                <div className="text-6xl">{mockTechnician.image}</div>
-                <div>
-                  <h3 className="font-bold text-lg text-gray-800">{mockTechnician.name}</h3>
+              <div className="flex items-center gap-4 flex-1">
+                <div className="text-6xl">{technician.image}</div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg text-gray-800">{technician.name}</h3>
                   <div className="flex items-center gap-1 text-sm text-yellow-600 mb-1">
-                    <span>⭐ {mockTechnician.rating}</span>
-                    <span className="text-gray-600">({mockTechnician.reviews} reviews)</span>
+                    <span>⭐ {technician.rating}</span>
+                    {technician.reviews > 0 && (
+                      <span className="text-gray-600">({technician.reviews} reviews)</span>
+                    )}
                   </div>
-                  <p className="text-sm text-gray-600">{mockTechnician.experience} experience</p>
+                  <p className="text-sm text-gray-600">{technician.experience} experience</p>
+                  {technician.specializations && technician.specializations.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {technician.specializations.map((spec: string, idx: number) => (
+                        <span key={idx} className="text-xs px-2 py-1 bg-orange-600 text-white rounded-full">
+                          {spec}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-              <a
-                href={`tel:${mockTechnician.phone}`}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-              >
-                Call Technician
-              </a>
+              <div className="flex gap-2 flex-wrap">
+                <a
+                  href={`tel:${technician.phone}`}
+                  className="bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-700 transition-colors"
+                >
+                  📞 Call
+                </a>
+                {booking?.technicianDetails?.email && (
+                  <a
+                    href={`mailto:${booking.technicianDetails.email}`}
+                    className="bg-slate-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-slate-700 transition-colors"
+                  >
+                    ✉️ Email
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -230,7 +301,7 @@ export default function TrackingScreen() {
                 </div>
                 <div className="pb-8">
                   <p className="font-semibold text-gray-800">Technician Assigned</p>
-                  <p className="text-xs text-gray-500 mt-1">Assigned to {mockTechnician.name}</p>
+                  <p className="text-xs text-gray-500 mt-1">Assigned to {booking?.assignedTechnician || technician.name}</p>
                 </div>
               </div>
             )}
@@ -311,5 +382,13 @@ export default function TrackingScreen() {
         </div>
       </nav>
     </div>
+  );
+}
+
+export default function TrackingScreen() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p>Loading...</p></div>}>
+      <TrackingContent />
+    </Suspense>
   );
 }

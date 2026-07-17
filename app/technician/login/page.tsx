@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { TechnicianAuthService } from '@/lib/technician-auth-service';
 
-export default function AdminLogin() {
+export default function TechnicianLogin() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,33 +19,40 @@ export default function AdminLogin() {
     setError('');
     setLoading(true);
 
-    // Validate inputs
     if (!email.trim() || !password.trim()) {
       setError('Please enter both email and password');
       setLoading(false);
       return;
     }
 
-    // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Demo credentials
-    const adminEmail = 'pandaabinash888@gmail.com';
-    const adminPassword = 'admin123';
+    // Verify credentials using the TechnicianAuthService
+    const credentials = TechnicianAuthService.verifyLogin(email, password);
 
-    if (email === adminEmail && password === adminPassword) {
-      const adminData = {
-        id: 'admin1',
-        name: 'Admin',
+    if (credentials) {
+      // Fetch full technician details from admin-created technician list
+      const technicians = JSON.parse(localStorage.getItem('technicians') || '[]');
+      const technicianDetails = technicians.find((t: any) => t.email === email);
+
+      const technicianData = {
+        id: credentials.id,
+        name: credentials.name,
         email: email,
-        role: 'admin',
+        role: 'technician',
+        phone: technicianDetails?.phone || '+91-98765-43210',
+        specializations: technicianDetails?.specializations || ['AC Repair', 'Refrigerator Service'],
+        experience: technicianDetails?.experience || 0,
+        rating: technicianDetails?.rating || 4.5,
+        completedJobs: technicianDetails?.completedJobs || 0,
+        totalEarnings: technicianDetails?.totalEarnings || 0,
         loginTime: new Date().toISOString(),
       };
-      localStorage.setItem('adminUser', JSON.stringify(adminData));
+      localStorage.setItem('technicianUser', JSON.stringify(technicianData));
       if (rememberMe) {
-        localStorage.setItem('rememberEmail', email);
+        localStorage.setItem('rememberTechEmail', email);
       }
-      router.push('/admin/dashboard');
+      router.push('/technician/dashboard');
     } else {
       setError('Invalid email or password. Please try again.');
     }
@@ -51,10 +60,10 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-orange-950 via-slate-900 to-orange-900 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 right-20 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
+        <div className="absolute top-20 right-20 w-72 h-72 bg-orange-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
         <div className="absolute -bottom-8 left-20 w-72 h-72 bg-slate-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
       </div>
 
@@ -62,7 +71,7 @@ export default function AdminLogin() {
         {/* Login Card */}
         <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-sm">
           {/* Header with gradient accent */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-10">
+          <div className="bg-gradient-to-r from-orange-600 to-orange-700 px-8 py-10">
             <div className="text-center">
               <div className="inline-block bg-white/10 backdrop-blur-sm rounded-xl p-3 mb-4 border border-white/20">
                 <svg
@@ -71,11 +80,11 @@ export default function AdminLogin() {
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                 </svg>
               </div>
               <h1 className="text-3xl font-bold text-white mb-1">AP TECH</h1>
-              <p className="text-blue-200 text-xs tracking-widest uppercase font-medium">Admin Portal</p>
+              <p className="text-orange-200 text-xs tracking-widest uppercase font-medium">Technician Portal</p>
             </div>
           </div>
 
@@ -105,8 +114,8 @@ export default function AdminLogin() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-500 transition"
-                  placeholder="pandaabinash888@gmail.com"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-slate-500 transition"
+                  placeholder="john.tech@gmail.com"
                   autoComplete="email"
                   required
                 />
@@ -121,7 +130,7 @@ export default function AdminLogin() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-blue-400 hover:text-blue-300 text-xs font-medium transition"
+                    className="text-orange-400 hover:text-orange-300 text-xs font-medium transition"
                   >
                     {showPassword ? 'Hide' : 'Show'}
                   </button>
@@ -131,7 +140,7 @@ export default function AdminLogin() {
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-500 transition"
+                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-slate-500 transition"
                     placeholder="••••••••"
                     autoComplete="current-password"
                     required
@@ -146,7 +155,7 @@ export default function AdminLogin() {
                   id="rememberMe"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 bg-slate-800 border border-slate-700 rounded focus:ring-2 focus:ring-blue-500 text-blue-600 cursor-pointer"
+                  className="w-4 h-4 bg-slate-800 border border-slate-700 rounded focus:ring-2 focus:ring-orange-500 text-orange-600 cursor-pointer"
                 />
                 <label htmlFor="rememberMe" className="text-sm text-slate-400 cursor-pointer hover:text-slate-300 transition">
                   Remember this email
@@ -157,7 +166,7 @@ export default function AdminLogin() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-slate-600 disabled:to-slate-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2 mt-7"
+                className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 disabled:from-slate-600 disabled:to-slate-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2 mt-7"
               >
                 {loading ? (
                   <>
@@ -189,15 +198,15 @@ export default function AdminLogin() {
               </p>
               <div className="space-y-3 bg-slate-800/50 rounded-lg p-4 border border-slate-700">
                 <div>
-                  <p className="text-slate-500 text-xs mb-1">Email</p>
-                  <code className="text-blue-400 text-xs font-mono break-all">
-                    pandaabinash888@gmail.com
-                  </code>
+                  <p className="text-slate-500 text-xs mb-1">Email Options</p>
+                  <code className="text-orange-400 text-xs font-mono block">john.tech@gmail.com</code>
+                  <code className="text-orange-400 text-xs font-mono block">sarah.repair@gmail.com</code>
+                  <code className="text-orange-400 text-xs font-mono block">mike.service@gmail.com</code>
                 </div>
                 <div>
                   <p className="text-slate-500 text-xs mb-1">Password</p>
-                  <code className="text-blue-400 text-xs font-mono">
-                    admin123
+                  <code className="text-orange-400 text-xs font-mono">
+                    tech123
                   </code>
                 </div>
               </div>
@@ -205,14 +214,20 @@ export default function AdminLogin() {
           </div>
         </div>
 
-        {/* Footer Info */}
+        {/* Footer Links */}
         <div className="text-center mt-6">
           <p className="text-slate-500 text-sm">
-            AP TECH Administration System
+            AP TECH Technician System
           </p>
-          <p className="text-slate-600 text-xs mt-2">
-            🔒 Secure access • Authorized personnel only
-          </p>
+          <div className="flex gap-4 justify-center mt-3">
+            <Link href="/" className="text-orange-400 hover:text-orange-300 text-xs font-medium transition">
+              Back to Home
+            </Link>
+            <span className="text-slate-600">•</span>
+            <Link href="/admin/login" className="text-orange-400 hover:text-orange-300 text-xs font-medium transition">
+              Admin Portal
+            </Link>
+          </div>
         </div>
       </div>
     </div>

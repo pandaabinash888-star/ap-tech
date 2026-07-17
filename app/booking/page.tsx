@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function BookingScreen() {
+function BookingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const serviceId = searchParams.get('service');
@@ -334,5 +334,13 @@ export default function BookingScreen() {
         </form>
       </main>
     </div>
+  );
+}
+
+export default function BookingScreen() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p>Loading...</p></div>}>
+      <BookingContent />
+    </Suspense>
   );
 }
