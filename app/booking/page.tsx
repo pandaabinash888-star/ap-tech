@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { PaymentMethods } from '@/components/payment-methods';
 import { paymentGateway, PaymentMethod } from '@/lib/payment-gateway';
 
-export default function BookingScreen() {
+function BookingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const serviceId = searchParams.get('service');
@@ -433,5 +433,13 @@ export default function BookingScreen() {
         </form>
       </main>
     </div>
+  );
+}
+
+export default function BookingScreen() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+      <BookingContent />
+    </Suspense>
   );
 }
